@@ -1,0 +1,31 @@
+<resources>
+    <string name="app_name">Lindo</string>
+    <string name="review_target_format">Target: %s</string>
+    <string name="no_known_sentences">No known sentences yet.</string>
+    <string name="queue_empty_message">Queue is empty!</string>
+    <string name="feedback_correct">Correct!</string>
+    <string name="feedback_incorrect">Incorrect!</string>
+    <string name="side_by_side_format">%1$s | %2$s</string>
+    <string name="btn_next_card">Next Card</string>
+    <string name="btn_submit_answer">Submit Answer</string>
+    <string name="btn_back_to_learning">Back to Learning</string>
+    <string name="entering_review_mode">Entering Review Mode</string>
+    <string name="btn_review_known">Review Known Sentences</string>
+    <string name="resuming_learning_queue">Resuming Learning Queue</string>
+    <string name="imported_count_format">Imported %d cards</string>
+    <string name="no_valid_data">No valid data found</string>
+    <string name="error_reading_file">Error reading file</string>
+    <string name="btn_import_tatoeba">Import Tatoeba File (.tsv)</string>
+    <string name="target_sentence_placeholder">Target sentence will appear here</string>
+    <string name="user_answer_hint">Type translation in native language</string>
+    <string name="score_total_format">Total: %d</string>
+    <string name="score_known_format">Known: %d</string>
+    <string name="score_unknown_format">Unknown: %d</string>
+    <string name="current_collection_format">Collection: %s</string>
+    <string name="btn_collections">Collections</string>
+    <string name="dialog_title_collections">Manage Collections</string>
+    <string name="btn_save_as">Save As New</string>
+    <string name="btn_clear_collection">Clear Current</string>
+    <string name="btn_sort_collections">Sort List</string>
+    <string name="prompt_new_collection_name">Enter new collection name</string>
+</resources>
