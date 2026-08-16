@@ -1,5 +1,7 @@
 package com.example.flashcards.ui
 
+import android.content.ContentResolver
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -14,7 +16,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import java.io.BufferedReader
-import java.io.InputStream
 import java.io.InputStreamReader
 import java.util.LinkedList
 
@@ -47,9 +48,13 @@ class MainViewModel(
     private val _availableCollections = MutableStateFlow<List<String>>(value = emptyList())
     val availableCollections: StateFlow<List<String>> = _availableCollections.asStateFlow()
 
+    private val _importResult = MutableStateFlow<ImportResult?>(null)
+    val importResult: StateFlow<ImportResult?> = _importResult.asStateFlow()
+
     private val activeQueue = LinkedList<Flashcard>()
     private val knownCards = mutableListOf<Flashcard>()
 
+    data class ImportResult(val success: Boolean, val count: Int = 0)
     data class Feedback(val isCorrect: Boolean)
     data class Score(val total: Int, val known: Int, val unknown: Int)
 
@@ -182,27 +187,34 @@ class MainViewModel(
         loadCards()
     }
 
-    fun importFromStream(inputStream: InputStream) {
+    fun importFromUri(contentResolver: ContentResolver, uri: Uri) {
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                BufferedReader(InputStreamReader(inputStream)).use { reader ->
-                    val newCards = mutableListOf<Flashcard>()
-                    var line: String? = reader.readLine()
-                    while (line != null) {
-                        val parts = line.split("\t")
-                        if (parts.size >= 4) {
-                            val nativeText = parts[1].trim().removeSurrounding("\"")
-                            val targetText = parts[3].trim().removeSurrounding("\"")
-                            newCards.add(Flashcard(nativeText = nativeText, targetText = targetText, isKnown = false))
+                _importResult.value = null
+                contentResolver.openInputStream(uri)?.use { inputStream ->
+                    BufferedReader(InputStreamReader(inputStream)).use { reader ->
+                        val newCards = mutableListOf<Flashcard>()
+                        var line: String? = reader.readLine()
+                        while (line != null) {
+                            val parts = line.split("\t")
+                            if (parts.size >= 4) {
+                                val nativeText = parts[1].trim().removeSurrounding("\"")
+                                val targetText = parts[3].trim().removeSurrounding("\"")
+                                newCards.add(Flashcard(nativeText = nativeText, targetText = targetText, isKnown = false))
+                            }
+                            line = reader.readLine()
                         }
-                        line = reader.readLine()
-                    }
-                    if (newCards.isNotEmpty()) {
-                        saveImportedCards(newCards)
+                        if (newCards.isNotEmpty()) {
+                            saveImportedCards(newCards)
+                            _importResult.value = ImportResult(success = true, count = newCards.size)
+                        } else {
+                            _importResult.value = ImportResult(success = false)
+                        }
                     }
                 }
             } catch (e: Exception) {
-                Log.e("MainViewModel", "Error importing cards", e)
+                Log.e("MainViewModel", "Error importing cards from $uri", e)
+                _importResult.value = ImportResult(success = false)
             }
         }
     }

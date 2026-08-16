@@ -93,10 +93,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnImport.setOnClickListener {
-            // Opens file manager for TSV files
+            // Opens file manager for TSV and plain text files
             filePickerLauncher.launch(
                 arrayOf(
                     "text/tab-separated-values",
+                    "text/plain",
+                    "application/octet-stream",
+                    "*/*"
                 ),
             )
         }
@@ -167,6 +170,16 @@ class MainActivity : AppCompatActivity() {
         viewModel.user.collectIn(this) { user ->
             supportActionBar?.title = "Lindo - ${user.name}"
         }
+
+        viewModel.importResult.collectIn(this) { result ->
+            result?.let {
+                if (it.success) {
+                    Toast.makeText(this, getString(R.string.imported_count_format, it.count), Toast.LENGTH_LONG).show()
+                } else {
+                    toast(R.string.no_valid_data)
+                }
+            }
+        }
     }
 
     private fun showCollectionManagerDialog(sorted: Boolean = false) {
@@ -227,13 +240,6 @@ class MainActivity : AppCompatActivity() {
     // File parsing logic
 
     private fun readTatoebaFile(uri: Uri) {
-        try {
-            contentResolver.openInputStream(uri)?.use { inputStream ->
-                viewModel.importFromStream(inputStream)
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error reading file: $uri", e)
-            toast(R.string.error_reading_file, length = Toast.LENGTH_LONG)
-        }
+        viewModel.importFromUri(contentResolver, uri)
     }
 }
